@@ -1,0 +1,74 @@
+% !TeX root = main.tex
+
+\documentclass[main.tex]{subfiles}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\begin{tikzpicture}[overlay,remember picture]
+% Khung ngoài bám đúng lề trái 3.5cm và phải 2.5cm
+\draw [line width=3pt]
+    ($ (current page.north west) + (3.5cm,-2.0cm) $)
+    rectangle
+    ($ (current page.south east) + (-2.5cm,2.5cm) $);
+
+% Khung trong thụt đều vào 1mm
+\draw [line width=0.5pt]
+    ($ (current page.north west) + (3.6cm,-2.1cm) $)
+    rectangle
+    ($ (current page.south east) + (-2.6cm,2.6cm) $);
+\end{tikzpicture}
+
+\begin{center}
+  
+% \vspace{-8pt}
+\textbf{\fontsize{15pt}{0pt}\selectfont ĐẠI HỌC BÁCH KHOA HÀ NỘI} \\
+\textbf{\fontsize{15pt}{0pt}\selectfont TRƯỜNG CƠ KHÍ} \\
+\textbf{\fontsize{15pt}{0pt}\selectfont KHOA NĂNG LƯỢNG NHIỆT}
+\vspace{0.8cm}
+ \begin{figure}[H]
+     \centering
+     \includegraphics[width=0.18\textwidth]{logoBK.png}
+ \end{figure}
+\vspace{0.8cm}
+\textbf{\fontsize{22pt}{0pt}\selectfont ĐỒ ÁN ĐIỀU KHIỂN QUÁ TRÌNH VÀ THIẾT BỊ NĂNG LƯỢNG}
+\vspace{9pt}
+
+\end{center}
+
+\begin{center}
+
+  \parbox{0.8\textwidth}{
+    \centering
+    \textbf{\fontsize{18pt}{0pt}\selectfont
+      ĐỀ TÀI : THIẾT KẾ, NHẬN DẠNG VÀ TRIỂN KHAI HỆ THỐNG ĐIỀU KHIỂN HAI VÒNG CHO THIẾT BỊ NĂNG LƯỢNG TRÊN NỀN TẢNG PLC S7-1200}
+  }
+
+\vspace{1cm}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.6}
+\centering
+    \begin{tabular}{ll}
+        \textbf{Họ tên SV:}      & \textbf{VŨ ĐỨC MINH - 20214749}        \\
+                                 & \textbf{CAO VĂN ĐỨC - 20241272E}       \\
+        \textbf{Mã lớp:}         & \textbf{758872}             \\
+        \textbf{Học kỳ:}         & \textbf{2025.1}             \\
+        \textbf{GVHD:}           & \textbf{TS. ĐỖ CAO TRUNG}
+    \end{tabular}
+\end{table}
+
+\end{center}
+
+\begin{tikzpicture}[overlay,remember picture]
+  % Căn giữa theo khung, cao hơn đáy khung 0.3cm
+  \node[anchor=south,align=center]
+    at ($(current page.south west)+(11cm,2.8cm)$)
+    {\fontsize{14pt}{0pt}\selectfont \textit{Hà Nội, 01/2026}};
+\end{tikzpicture}
+
+
+\cleardoublepage
+
+\end{document}
