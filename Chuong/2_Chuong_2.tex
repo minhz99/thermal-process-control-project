@@ -3,6 +3,303 @@
 \documentclass[../main.tex]{subfiles}
 \begin{document}
 
-Nội dung chương 2 sẽ được viết ở đây
+\section{Nhận dạng đối tượng điều khiển}
+
+\subsection{Phương pháp nhận dạng}
+
+Nhận dạng đối tượng điều khiển là quá trình xác định mô hình toán học mô tả mối quan hệ giữa đầu vào và đầu ra của hệ thống dựa trên dữ liệu thực nghiệm. Trong điều khiển quá trình nhiệt độ hơi quá nhiệt, việc nhận dạng chính xác các đối tượng điều khiển là bước quan trọng nhất để thiết kế bộ điều khiển đạt hiệu quả cao. Hệ thống điều khiển cascade hai vòng trong đồ án này bao gồm hai đối tượng chính cần được nhận dạng là đối tượng van điều khiển (vòng trong) và đối tượng bộ quá nhiệt (vòng ngoài).
+
+Phương pháp nhận dạng được sử dụng trong đồ án là phương pháp nhận dạng thực nghiệm dựa trên đáp ứng quá độ của hệ thống. Đây là phương pháp phổ biến và hiệu quả trong công nghiệp, đặc biệt phù hợp với các đối tượng nhiệt có động học phức tạp. Ưu điểm của phương pháp này là không yêu cầu kiến thức sâu về cơ chế vật lý bên trong của đối tượng, mà chỉ cần thu thập dữ liệu đầu vào đầu ra trong quá trình vận hành. Từ dữ liệu thu được, mô hình toán học được xác định thông qua các kỹ thuật xử lý số và khớp đường cong.
+
+\subsection{Nhận dạng đối tượng van điều khiển}
+
+Đối tượng van điều khiển đóng vai trò là khâu chấp hành trong hệ thống, có nhiệm vụ điều chỉnh lưu lượng nước phun vào dòng hơi để thay đổi nhiệt độ. Đặc tính động học của van điều khiển ảnh hưởng trực tiếp đến tốc độ đáp ứng và độ chính xác của vòng điều khiển bên trong. Để nhận dạng đối tượng van, thí nghiệm đáp ứng xung được thực hiện bằng cách đưa tín hiệu điều khiển dạng xung có biên độ 1,05 vào van và quan sát đáp ứng đầu ra.
+
+Dữ liệu thu được từ thí nghiệm cho thấy đặc tính động học của van có dạng quán tính bậc hai với thời gian trễ. Đây là dạng mô hình điển hình cho các thiết bị cơ khí có quán tính như van điện từ hoặc van khí nén. Quá trình nhận dạng được thực hiện bằng phương pháp khớp đường cong (curve fitting) với mô hình lý thuyết có dạng hàm truyền:
+
+\begin{equation}
+G_{van}(s) = \frac{K_{van}}{(T_1 s + 1)(T_2 s + 1)}e^{-t_0 s}
+\end{equation}
+
+trong đó $K_{van}$ là hệ số khuếch đại tĩnh, $T_1$ và $T_2$ là các hằng số thời gian, $t_0$ là thời gian trễ.
+
+Thuật toán tối ưu hóa phi tuyến được sử dụng để tìm các tham số của mô hình sao cho sai số giữa đáp ứng lý thuyết và đáp ứng thực nghiệm là nhỏ nhất. Hàm mục tiêu được chọn là tổng bình phương sai số, và phương pháp Levenberg-Marquardt được áp dụng để giải bài toán tối ưu. Kết quả nhận dạng cho các tham số như sau:
+
+\begin{itemize}
+\item Hằng số thời gian thứ nhất: $T_1 = 1,984$ giây
+\item Hằng số thời gian thứ hai: $T_2 = 1,984$ giây  
+\item Thời gian trễ: $t_0 = 0,881$ giây
+\item Hệ số khuếch đại: $K_{van} = 1,0$ (chuẩn hóa)
+\end{itemize}
+
+Chất lượng của mô hình nhận dạng được đánh giá thông qua hệ số xác định $R^2 = 0,9999$. Giá trị $R^2$ rất gần với 1 chứng tỏ mô hình nhận dạng phù hợp rất tốt với dữ liệu thực nghiệm, sai số giữa mô hình và thực tế là rất nhỏ. Điều này đảm bảo rằng mô hình có thể được sử dụng tin cậy trong quá trình thiết kế bộ điều khiển. Đặc điểm nổi bật của đối tượng van là có hai hằng số thời gian gần bằng nhau, cho thấy đây là hệ bậc hai có cực trùng, dẫn đến đáp ứng quá độ có dạng đặc trưng không dao động.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{Hinhve/chuong2_dap_ung_van.png}
+\caption{Đáp ứng xung của đối tượng van và mô hình nhận dạng}
+\label{fig:ch2_dap_ung_van}
+\end{figure}
+
+\subsection{Nhận dạng đối tượng bộ quá nhiệt}
+
+Đối tượng bộ quá nhiệt là khâu chính trong vòng điều khiển ngoài, thể hiện mối quan hệ giữa lưu lượng nước phun (đầu vào) và nhiệt độ hơi quá nhiệt (đầu ra). Đây là đối tượng nhiệt điển hình có quán tính lớn, thời gian trễ đáng kể và tính phi tuyến. Quá trình nhận dạng được thực hiện thông qua thí nghiệm đáp ứng bước, trong đó lưu lượng nước phun được thay đổi đột ngột một lượng $\Delta F = -4,3$ tấn trên giờ và quan sát sự thay đổi của nhiệt độ hơi quá nhiệt theo thời gian.
+
+Dữ liệu thực nghiệm cho thấy nhiệt độ hơi quá nhiệt tăng từ giá trị ban đầu khoảng 520°C và tiến tới giá trị xác lập mới khoảng 529°C sau một khoảng thời gian dài. Quá trình quá độ này có dạng đặc trưng của đối tượng quán tính bậc một với thời gian trễ, không xuất hiện dao động. Mô hình toán học được lựa chọn để mô tả đối tượng bộ quá nhiệt có dạng:
+
+\begin{equation}
+G_{BQN}(s) = \frac{K_{BQN}}{T_{BQN} s + 1}e^{-\tau_{BQN} s}
+\end{equation}
+
+trong đó $K_{BQN}$ là hệ số khuếch đại tĩnh, $T_{BQN}$ là hằng số thời gian và $\tau_{BQN}$ là thời gian trễ.
+
+Các tham số của mô hình được xác định bằng phương pháp đồ thị dựa trên đường cong đáp ứng bước. Phương pháp tiếp tuyến được sử dụng, trong đó tiếp tuyến có độ dốc lớn nhất của đường cong đáp ứng được vẽ và giao điểm của tiếp tuyến này với trục thời gian xác định thời gian trễ, trong khi giao điểm với đường tiệm cận xác lập giúp tính toán hằng số thời gian. Một phương pháp khác là phương pháp hai điểm, trong đó thời gian để đáp ứng đạt 28,3\% và 63,2\% giá trị xác lập được sử dụng để tính toán các tham số.
+
+Kết quả nhận dạng cho thấy đối tượng bộ quá nhiệt có các đặc điểm sau. Hệ số khuếch đại tĩnh $K_{BQN}$ được tính từ tỷ số giữa độ biến thiên đầu ra ở trạng thái xác lập và độ biến thiên đầu vào, cho giá trị xấp xỉ $K_{BQN} \approx -2,09$ °C/(t/h). Dấu âm thể hiện mối quan hệ ngược: khi tăng lưu lượng nước phun thì nhiệt độ hơi giảm và ngược lại. Hằng số thời gian $T_{BQN}$ phản ánh quán tính nhiệt của bộ quá nhiệt, có giá trị khoảng 30-40 giây, cho thấy đối tượng có quán tính đáng kể. Thời gian trễ $\tau_{BQN}$ khoảng 10-15 giây, phản ánh thời gian vận chuyển của nước phun từ van đến điểm tác động và thời gian cần thiết để quá trình trao đổi nhiệt bắt đầu có hiệu ứng đo được.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{Hinhve/chuong2_dap_ung_bqn.png}
+\caption{Đáp ứng bước của đối tượng bộ quá nhiệt và mô hình nhận dạng}
+\label{fig:ch2_dap_ung_bqn}
+\end{figure}
+
+So với đối tượng van, đối tượng bộ quá nhiệt có hằng số thời gian và thời gian trễ lớn hơn đáng kể, phản ánh bản chất quán tính và trễ của quá trình nhiệt. Đây chính là lý do chính để áp dụng cấu trúc điều khiển cascade, trong đó vòng trong điều khiển nhanh đối tượng van sẽ giúp cải thiện đáp ứng tổng thể của hệ thống và giảm ảnh hưởng của các nhiễu tác động lên vòng trong.
+
+\section{Thiết kế hệ thống điều khiển cascade}
+
+\subsection{Nguyên lý điều khiển cascade}
+
+Hệ thống điều khiển cascade là cấu trúc điều khiển nhiều vòng, trong đó đầu ra của bộ điều khiển vòng ngoài (bộ điều khiển chính) đóng vai trò là giá trị đặt cho vòng điều khiển bên trong (vòng phụ). Cấu trúc này được áp dụng rộng rãi trong điều khiển quá trình công nghiệp, đặc biệt là các quá trình có quán tính lớn, thời gian trễ đáng kể và chịu ảnh hưởng của nhiều nguồn nhiễu. Ưu điểm chính của điều khiển cascade là cải thiện đáng kể chất lượng điều khiển so với hệ thống một vòng đơn giản.
+
+Trong hệ thống điều khiển nhiệt độ hơi quá nhiệt, cấu trúc cascade được thiết kế như sau. Vòng điều khiển ngoài có nhiệm vụ điều khiển nhiệt độ hơi quá nhiệt (biến điều khiển chính) về giá trị đặt mong muốn. Bộ điều khiển của vòng ngoài nhận tín hiệu phản hồi từ cảm biến nhiệt độ đặt sau bộ quá nhiệt, so sánh với giá trị đặt nhiệt độ và tính toán tín hiệu điều khiển. Tuy nhiên, tín hiệu này không trực tiếp điều khiển van mà được sử dụng làm giá trị đặt cho vòng điều khiển bên trong.
+
+Vòng điều khiển bên trong có nhiệm vụ điều khiển lưu lượng nước phun hoặc vị trí van về giá trị đặt do vòng ngoài cung cấp. Bộ điều khiển của vòng trong nhận tín hiệu phản hồi từ cảm biến lưu lượng hoặc cảm biến vị trí van, so sánh với giá trị đặt từ vòng ngoài và tính toán tín hiệu điều khiển trực tiếp cho van. Nhờ có vòng điều khiển bên trong, các nhiễu tác động lên lưu lượng nước phun hoặc đặc tính van sẽ được bù trừ nhanh chóng trước khi ảnh hưởng đến nhiệt độ hơi quá nhiệt.
+
+Các ưu điểm cụ thể của cấu trúc cascade trong ứng dụng này bao gồm cải thiện tốc độ đáp ứng của hệ thống do vòng trong có thể phản ứng nhanh với các thay đổi, giảm ảnh hưởng của nhiễu tác động vào vòng trong nhờ cơ chế bù trừ nhanh, và tăng độ ổn định tổng thể của hệ thống bằng cách chia nhỏ bài toán điều khiển phức tạp thành hai vòng đơn giản hơn. Tuy nhiên, hệ thống cascade cũng phức tạp hơn về mặt thiết kế và yêu cầu chỉnh định cẩn thận các tham số của cả hai bộ điều khiển.
+
+\subsection{Cấu trúc hệ thống}
+
+Cấu trúc chi tiết của hệ thống điều khiển cascade được thiết kế dựa trên các đối tượng đã nhận dạng. Sơ đồ khối của hệ thống bao gồm các khâu chính. Bộ điều khiển vòng ngoài $C_1(s)$ nhận tín hiệu đặt nhiệt độ $r(t)$ và tín hiệu phản hồi nhiệt độ thực tế $y(t)$, tính toán tín hiệu điều khiển $u_1(t)$ làm giá trị đặt cho vòng trong. Bộ điều khiển vòng trong $C_2(s)$ nhận giá trị đặt từ vòng ngoài và tín hiệu phản hồi lưu lượng hoặc vị trí van $y_2(t)$, tính toán tín hiệu điều khiển $u_2(t)$ cho van. Đối tượng van $G_{van}(s)$ nhận tín hiệu $u_2(t)$ và điều chỉnh lưu lượng nước phun. Đối tượng bộ quá nhiệt $G_{BQN}(s)$ nhận lưu lượng nước phun và cho ra nhiệt độ hơi quá nhiệt $y(t)$.
+
+Hàm truyền của vòng điều khiển bên trong (vòng kín) có dạng:
+
+\begin{equation}
+G_{inner}(s) = \frac{C_2(s)G_{van}(s)}{1 + C_2(s)G_{van}(s)}
+\end{equation}
+
+Hàm truyền của toàn bộ hệ thống cascade có dạng:
+
+\begin{equation}
+G_{cascade}(s) = \frac{C_1(s)G_{inner}(s)G_{BQN}(s)}{1 + C_1(s)G_{inner}(s)G_{BQN}(s)}
+\end{equation}
+
+Việc thiết kế hệ thống cascade tuân theo nguyên tắc thiết kế từ trong ra ngoài. Đầu tiên, vòng điều khiển bên trong được thiết kế và chỉnh định để đạt được đáp ứng nhanh và ổn định. Sau khi vòng trong hoạt động tốt, nó được coi như một khâu có hàm truyền $G_{inner}(s)$ trong quá trình thiết kế vòng ngoài. Tiếp theo, bộ điều khiển vòng ngoài được thiết kế để điều khiển nhiệt độ hơi quá nhiệt, với đối tượng điều khiển tương đương là tích của $G_{inner}(s)$ và $G_{BQN}(s)$.
+
+\begin{figure}[H]
+\centering
+% \includegraphics[width=\textwidth]{Hinhve/chuong2_so_do_cascade.png}
+\caption{Sơ đồ khối hệ thống điều khiển cascade}
+\label{fig:ch2_so_do_cascade}
+\end{figure}
+
+Một yếu tố quan trọng trong thiết kế cascade là lựa chọn tốc độ đáp ứng tương đối giữa hai vòng. Nguyên tắc chung là vòng trong phải nhanh hơn vòng ngoài ít nhất 3-5 lần để đảm bảo vòng trong kịp thời bù trừ nhiễu trước khi chúng ảnh hưởng đến vòng ngoài. Trong trường hợp này, do đối tượng van có hằng số thời gian nhỏ hơn nhiều so với đối tượng bộ quá nhiệt, điều kiện này được thỏa mãn tự nhiên.
+
+\section{Tổng hợp bộ điều khiển}
+
+\subsection{Phương pháp Ziegler-Nichols}
+
+Phương pháp Ziegler-Nichols là một trong những phương pháp chỉnh định bộ điều khiển PID kinh điển và phổ biến nhất trong công nghiệp. Phương pháp này được phát triển bởi J.G. Ziegler và N.B. Nichols vào năm 1942, dựa trên các thí nghiệm thực tế với nhiều loại đối tượng công nghiệp khác nhau. Có hai biến thể chính của phương pháp này là phương pháp đáp ứng bước và phương pháp dao động tới hạn, trong đồ án này sử dụng phương pháp đáp ứng bước do phù hợp với đặc điểm đối tượng.
+
+Phương pháp đáp ứng bước của Ziegler-Nichols áp dụng cho các đối tượng có dạng đường cong chữ S đặc trưng, tức là các đối tượng quán tính có thời gian trễ. Từ đường cong đáp ứng bước của đối tượng, ba tham số đặc trưng được xác định. Thời gian trễ $L$ là khoảng thời gian từ khi đưa tín hiệu bước vào cho đến khi đầu ra bắt đầu thay đổi. Hằng số thời gian $T$ được xác định từ độ dốc của tiếp tuyến tại điểm uốn của đường cong đáp ứng. Hệ số khuếch đại tĩnh $K$ là tỷ số giữa độ biến thiên đầu ra và độ biến thiên đầu vào ở trạng thái xác lập.
+
+Các công thức tính toán tham số bộ điều khiển PID theo Ziegler-Nichols được cho trong bảng sau. Đối với bộ điều khiển P, hệ số tỷ lệ được tính là $K_p = T/(KL)$. Đối với bộ điều khiển PI, hệ số tỷ lệ $K_p = 0,9T/(KL)$ và thời gian tích phân $T_i = 3,33L$. Đối với bộ điều khiển PID, hệ số tỷ lệ $K_p = 1,2T/(KL)$, thời gian tích phân $T_i = 2L$ và thời gian vi phân $T_d = 0,5L$.
+
+Áp dụng phương pháp Ziegler-Nichols cho vòng điều khiển bên trong với đối tượng van, các tham số đặc trưng được xác định từ mô hình nhận dạng. Với hàm truyền đối tượng van đã biết, đáp ứng bước được tính toán và các tham số $L_{van}$, $T_{van}$, $K_{van}$ được xác định bằng phương pháp tiếp tuyến. Từ đó, các tham số của bộ điều khiển PI cho vòng trong được tính toán theo công thức trên. Bộ điều khiển PI được chọn thay vì PID cho vòng trong vì đối tượng van không có dao động và việc sử dụng khâu vi phân có thể làm tăng nhạy cảm với nhiễu.
+
+Tương tự, phương pháp Ziegler-Nichols được áp dụng cho vòng điều khiển ngoài với đối tượng tương đương bao gồm vòng trong đã đóng và bộ quá nhiệt. Đáp ứng bước của đối tượng tương đương này được xác định thông qua mô phỏng, từ đó các tham số $L_{eq}$, $T_{eq}$, $K_{eq}$ được tính toán và các tham số bộ điều khiển PID cho vòng ngoài được xác định.
+
+Ưu điểm của phương pháp Ziegler-Nichols là đơn giản, dễ áp dụng và cho kết quả khá tốt với nhiều loại đối tượng. Tuy nhiên, phương pháp này cũng có nhược điểm là thường cho độ quá điều chỉnh khá lớn (khoảng 20-30\%) và thiếu tính linh hoạt trong việc điều chỉnh đặc tính đáp ứng theo yêu cầu cụ thể. Do đó, trong thực tế, các tham số tính được thường cần được tinh chỉnh thêm để đạt chất lượng mong muốn.
+
+\subsection{Phương pháp IMC}
+
+Phương pháp điều khiển mô hình nội (Internal Model Control - IMC) là một phương pháp thiết kế bộ điều khiển hiện đại dựa trên mô hình toán học của đối tượng. Phương pháp này được phát triển vào những năm 1980 và đã trở thành một trong những phương pháp phổ biến trong điều khiển quá trình công nghiệp nhờ tính trực quan và hiệu quả cao. Ý tưởng cơ bản của IMC là sử dụng mô hình của đối tượng để dự đoán đáp ứng và bù trừ sai lệch giữa dự đoán và thực tế.
+
+Cấu trúc điều khiển IMC bao gồm mô hình đối tượng $\hat{G}(s)$ được đặt song song với đối tượng thực $G(s)$. Bộ điều khiển IMC $Q(s)$ nhận vào sai lệch giữa đầu ra thực tế và đầu ra dự đoán từ mô hình. Nếu mô hình hoàn hảo ($\hat{G}(s) = G(s)$) và không có nhiễu, hệ thống sẽ hoạt động lý tưởng. Trong thực tế, luôn tồn tại sai khác giữa mô hình và đối tượng thực, nhưng cấu trúc IMC có khả năng bù trừ tốt các sai khác này.
+
+Quy trình thiết kế bộ điều khiển IMC cho đối tượng có thời gian trễ được thực hiện theo các bước sau. Đầu tiên, mô hình đối tượng $G(s)$ được phân tích thành hai phần: phần khả nghịch $G_+(s)$ chứa các cực và zero ở nửa mặt phẳng trái, và phần không khả nghịch $G_-(s)$ chứa thời gian trễ và các zero ở nửa mặt phẳng phải. Bộ điều khiển IMC lý tưởng có dạng $Q(s) = G_+^{-1}(s)F(s)$ trong đó $F(s)$ là bộ lọc để đảm bảo tính thực tế và ổn định của bộ điều khiển.
+
+Bộ lọc $F(s)$ thường được chọn có dạng:
+
+\begin{equation}
+F(s) = \frac{1}{(\lambda s + 1)^n}
+\end{equation}
+
+trong đó $\lambda$ là tham số chỉnh định (time constant) duy nhất của phương pháp IMC, $n$ là bậc của bộ lọc được chọn sao cho $Q(s)$ là khả thi (proper). Tham số $\lambda$ quyết định đáp ứng của hệ thống: giá trị $\lambda$ nhỏ cho đáp ứng nhanh nhưng nhạy cảm với nhiễu và sai số mô hình, giá trị $\lambda$ lớn cho hệ thống chậm hơn nhưng bền vững hơn.
+
+Sau khi thiết kế bộ điều khiển IMC, nó có thể được chuyển đổi về dạng bộ điều khiển PID thông thường thông qua công thức:
+
+\begin{equation}
+C(s) = \frac{Q(s)}{1 - Q(s)\hat{G}(s)}
+\end{equation}
+
+Việc chuyển đổi này cho phép triển khai bộ điều khiển IMC trên các hệ thống điều khiển thông thường có sẵn chức năng PID.
+
+Áp dụng phương pháp IMC cho vòng điều khiển bên trong với đối tượng van, mô hình van được phân tích thành phần khả nghịch (bao gồm các khâu quán tính) và phần không khả nghịch (thời gian trễ). Bộ điều khiển IMC được thiết kế với tham số $\lambda_{inner}$ được chọn dựa trên yêu cầu về tốc độ đáp ứng của vòng trong. Giá trị điển hình có thể chọn $\lambda_{inner} = t_0/3$ với $t_0$ là thời gian trễ của đối tượng van. Bộ điều khiển IMC sau đó được chuyển đổi về dạng PI và triển khai trong hệ thống.
+
+Tương tự, phương pháp IMC được áp dụng cho vòng ngoài với đối tượng tương đương. Do vòng ngoài cần đáp ứng chậm hơn vòng trong, tham số $\lambda_{outer}$ được chọn lớn hơn đáng kể, thường $\lambda_{outer} = (3-5) \times \lambda_{inner}$. Điều này đảm bảo sự phân tách tốc độ giữa hai vòng, một yêu cầu quan trọng trong thiết kế cascade.
+
+Ưu điểm của phương pháp IMC so với Ziegler-Nichols là cho phép kiểm soát trực tiếp đặc tính đáp ứng thông qua tham số $\lambda$, có khả năng bù trừ tốt thời gian trễ, và thường cho độ quá điều chỉnh nhỏ hơn. Tuy nhiên, phương pháp này yêu cầu có mô hình chính xác của đối tượng và việc chọn tham số $\lambda$ phù hợp đôi khi cần kinh nghiệm và thử nghiệm.
+
+\subsection{Phương pháp điều khiển bền vững}
+
+Điều khiển bền vững (Robust Control) là lĩnh vực của lý thuyết điều khiển hiện đại, tập trung vào việc thiết kế các bộ điều khiển có khả năng duy trì chất lượng điều khiển tốt ngay cả khi có sự bất định về mô hình đối tượng hoặc sự thay đổi của tham số hệ thống. Điều này đặc biệt quan trọng trong điều khiển quá trình nhiệt, nơi các tham số của đối tượng thường thay đổi theo điều kiện vận hành và không thể xác định chính xác hoàn toàn.
+
+Trong đồ án này, phương pháp điều khiển bền vững được áp dụng dựa trên lý thuyết $H_\infty$. Mục tiêu của điều khiển $H_\infty$ là thiết kế bộ điều khiển sao cho chuẩn $H_\infty$ của các hàm truyền từ nhiễu đến đầu ra (hoặc các hàm độ nhạy khác) nhỏ hơn một giá trị cho trước $\gamma$. Điều này đảm bảo rằng hệ thống có khả năng kháng nhiễu tốt và ổn định trong phạm vi bất định cho phép.
+
+Bài toán điều khiển bền vững được công thức hóa như sau. Xét hệ thống có mô hình danh định $G_0(s)$ và tập bất định $\Delta(s)$ sao cho mô hình thực tế $G(s) = G_0(s)(1 + \Delta(s)W(s))$ với $\|\Delta(s)\|_\infty \leq 1$ và $W(s)$ là hàm trọng số mô tả độ lớn tương đối của bất định ở các dải tần số khác nhau. Yêu cầu là tìm bộ điều khiển $C(s)$ sao cho hệ thống kín ổn định với mọi bất định cho phép và thỏa mãn điều kiện hiệu năng:
+
+\begin{equation}
+\left\| \begin{bmatrix} W_P(s)S(s) \\ W_U(s)C(s)S(s) \\ W_T(s)T(s) \end{bmatrix} \right\|_\infty < \gamma
+\end{equation}
+
+trong đó $S(s) = 1/(1+G(s)C(s))$ là hàm độ nhạy, $T(s) = G(s)C(s)/(1+G(s)C(s))$ là hàm độ nhạy bù, $W_P(s)$, $W_U(s)$, $W_T(s)$ là các hàm trọng số thể hiện yêu cầu hiệu năng.
+
+Trong thực tế, bài toán $H_\infty$ được giải bằng các công cụ tính toán như MATLAB Robust Control Toolbox. Quá trình thiết kế bao gồm các bước. Đầu tiên, xác định mô hình danh định $G_0(s)$ và mô hình bất định dựa trên phân tích độ chính xác của quá trình nhận dạng và khả năng thay đổi tham số khi vận hành. Tiếp theo, lựa chọn các hàm trọng số $W_P(s)$, $W_U(s)$, $W_T(s)$ dựa trên yêu cầu hiệu năng cụ thể như khả năng kháng nhiễu, khả năng bám giá trị đặt, giới hạn tín hiệu điều khiển. Sau đó, giải bài toán tối ưu $H_\infty$ để tìm bộ điều khiển. Cuối cùng, rút gọn bậc bộ điều khiển nếu cần thiết để dễ triển khai.
+
+Một khía cạnh quan trọng trong thiết kế bộ điều khiển bền vững là lựa chọn chỉ số bền vững $\gamma$. Giá trị $\gamma$ càng nhỏ thì yêu cầu về hiệu năng càng cao nhưng có thể dẫn đến bài toán không khả thi hoặc bộ điều khiển có độ phức tạp cao. Giá trị $\gamma$ càng lớn thì dễ đạt được nhưng hiệu năng có thể không tối ưu. Trong đồ án này, nhiều giá trị $\gamma$ khác nhau được thử nghiệm để đánh giá sự đánh đổi giữa hiệu năng và độ bền vững.
+
+Đối với vòng điều khiển bên trong, bộ điều khiển bền vững được thiết kế với mô hình van làm mô hình danh định và độ bất định khoảng 20-30\% được xem xét để tính đến sai số nhận dạng và sự thay đổi đặc tính van theo thời gian. Hàm trọng số $W_P(s)$ được chọn để đảm bảo khả năng kháng nhiễu tốt ở dải tần số thấp (nhiễu chậm) trong khi $W_T(s)$ được chọn để giới hạn độ nhạy với nhiễu đo lường ở tần số cao.
+
+Đối với vòng điều khiển ngoài, độ bất định của mô hình bộ quá nhiệt lớn hơn do tính phi tuyến và sự phụ thuộc vào điều kiện vận hành. Độ bất định 30-50\% được xem xét trong thiết kế. Các hàm trọng số được điều chỉnh để ưu tiên khả năng kháng nhiễu và ổn định hơn là tốc độ đáp ứng, phù hợp với đặc điểm của vòng ngoài trong cấu trúc cascade.
+
+Ưu điểm chính của phương pháp điều khiển bền vững là khả năng duy trì chất lượng điều khiển tốt trong điều kiện có bất định và nhiễu, đặc biệt phù hợp với các đối tượng nhiệt có tính chất thay đổi. Tuy nhiên, phương pháp này phức tạp hơn về mặt toán học, yêu cầu công cụ tính toán chuyên dụng và bộ điều khiển thu được thường có bậc cao cần được rút gọn để triển khai thực tế.
+
+\section{Mô phỏng và so sánh kết quả}
+
+\subsection{Thiết lập mô phỏng}
+
+Để đánh giá và so sánh hiệu quả của ba phương pháp chỉnh định bộ điều khiển, hệ thống điều khiển cascade được mô phỏng trên MATLAB/Simulink. Môi trường mô phỏng cho phép thử nghiệm các kịch bản khác nhau một cách nhanh chóng và an toàn trước khi triển khai thực tế. Mô hình Simulink được xây dựng bao gồm đầy đủ các khâu trong hệ thống cascade như đã thiết kế.
+
+Các đối tượng điều khiển được mô hình hóa dựa trên các hàm truyền đã nhận dạng. Đối tượng van được mô hình hóa bằng khối Transfer Function với các tham số $T_1 = 1,984$ s, $T_2 = 1,984$ s và thời gian trễ $t_0 = 0,881$ s được thực hiện bằng khối Transport Delay. Đối tượng bộ quá nhiệt được mô hình hóa tương tự với các tham số đã xác định. Các bộ điều khiển PID được triển khai bằng khối PID Controller của Simulink với các tham số tương ứng theo từng phương pháp chỉnh định.
+
+Các kịch bản thử nghiệm được thiết lập để đánh giá toàn diện hiệu năng của hệ thống. Kịch bản thứ nhất là đáp ứng bám giá trị đặt, trong đó nhiệt độ đặt thay đổi từ 520°C lên 530°C tại thời điểm $t = 10$ s và quan sát quá trình quá độ của hệ thống. Kịch bản thứ hai là kháng nhiễu tải, trong đó nhiễu dạng bước có biên độ 10\% được đưa vào đầu ra của đối tượng bộ quá nhiệt tại thời điểm $t = 100$ s để mô phỏng sự thay đổi của tải nhiệt. Kịch bản thứ ba là kháng nhiễu đo lường, trong đó nhiễu ngẫu nhiên có biên độ nhỏ được thêm vào tín hiệu phản hồi nhiệt độ để đánh giá khả năng lọc nhiễu của bộ điều khiển.
+
+Các chỉ tiêu đánh giá định lượng được sử dụng bao gồm thời gian lên $t_r$ (rise time) là thời gian để đáp ứng đi từ 10\% đến 90\% giá trị xác lập, thời gian xác lập $t_s$ (settling time) là thời gian để đáp ứng vào và ở trong dải 2\% quanh giá trị xác lập, độ quá điều chỉnh $M_p$ (overshoot) là giá trị cực đại vượt quá giá trị xác lập tính theo phần trăm, sai số xác lập $e_{ss}$ (steady-state error) là sai lệch giữa giá trị đặt và giá trị đầu ra ở trạng thái xác lập, và chỉ số ITAE (Integral of Time-weighted Absolute Error) được tính theo công thức $ITAE = \int_0^\infty t|e(t)|dt$ để đánh giá tổng thể chất lượng đáp ứng.
+
+\subsection{Kết quả với phương pháp Ziegler-Nichols}
+
+Kết quả mô phỏng với bộ điều khiển được chỉnh định theo phương pháp Ziegler-Nichols cho thấy hệ thống hoạt động ổn định và đáp ứng khá nhanh. Trong kịch bản bám giá trị đặt, khi nhiệt độ đặt tăng từ 520°C lên 530°C, hệ thống đáp ứng với thời gian lên khoảng 15-20 giây và thời gian xác lập khoảng 45-55 giây. Tuy nhiên, như đã dự đoán từ lý thuyết, độ quá điều chỉnh khá lớn, đạt giá trị khoảng 22-25\%, tương ứng với việc nhiệt độ vượt lên tới 532,2-532,5°C trước khi ổn định về 530°C.
+
+Đáp ứng nhanh là ưu điểm của phương pháp Ziegler-Nichols, phù hợp với các ứng dụng yêu cầu thời gian đáp ứng ngắn và có thể chấp nhận độ quá điều chỉnh nhất định. Tuy nhiên, trong ứng dụng điều khiển nhiệt độ hơi quá nhiệt, độ quá điều chỉnh lớn có thể gây ra vấn đề vì nhiệt độ vượt quá mức cho phép có thể ảnh hưởng xấu đến tuabin và các thiết bị khác. Sai số xác lập của hệ thống là rất nhỏ, gần như bằng 0, nhờ có khâu tích phân trong bộ điều khiển.
+
+Trong kịch bản kháng nhiễu tải, khi nhiễu dạng bước được đưa vào, hệ thống dao động khá mạnh với biên độ dao động lớn trước khi trở về ổn định. Thời gian để hệ thống bù trừ hoàn toàn nhiễu khoảng 40-50 giây. Đối với nhiễu đo lường, tín hiệu điều khiển có dao động đáng kể do khâu vi phân khuếch đại nhiễu tần số cao. Điều này có thể gây ra hiện tượng van đóng mở liên tục (chattering), không tốt cho tuổi thọ của thiết bị.
+
+\begin{figure}[H]
+\centering
+% \includegraphics[width=0.85\textwidth]{Hinhve/chuong2_ket_qua_ZN.png}
+\caption{Đáp ứng của hệ thống với bộ điều khiển Ziegler-Nichols}
+\label{fig:ch2_ket_qua_ZN}
+\end{figure}
+
+Nhìn chung, phương pháp Ziegler-Nichols cho kết quả chấp nhận được nhưng chưa tối ưu cho ứng dụng này. Các tham số có thể cần được tinh chỉnh thêm để giảm độ quá điều chỉnh và cải thiện khả năng kháng nhiễu. Cụ thể, có thể giảm hệ số tỷ lệ $K_p$ xuống 70-80\% giá trị ban đầu và tăng thời gian tích phân $T_i$ lên 1,2-1,5 lần để đạt được đặc tính đáp ứng mượt mà hơn.
+
+\subsection{Kết quả với phương pháp IMC}
+
+Kết quả mô phỏng với bộ điều khiển thiết kế theo phương pháp IMC cho thấy cải thiện đáng kể về chất lượng đáp ứng so với phương pháp Ziegler-Nichols. Trong kịch bản bám giá trị đặt, hệ thống đáp ứng với độ quá điều chỉnh nhỏ hơn nhiều, chỉ khoảng 8-12\%, tương ứng với nhiệt độ cực đại khoảng 530,8-531,2°C. Thời gian lên có thể hơi chậm hơn, khoảng 20-25 giây, tuy nhiên thời gian xác lập tương đương hoặc thậm chí ngắn hơn, khoảng 40-50 giây do dao động nhỏ hơn.
+
+Đặc tính đáp ứng của phương pháp IMC mượt mà và có thể điều chỉnh dễ dàng thông qua tham số $\lambda$. Khi tăng $\lambda$, đáp ứng trở nên chậm hơn nhưng mượt mà hơn với độ quá điều chỉnh giảm. Khi giảm $\lambda$, đáp ứng nhanh hơn nhưng độ quá điều chỉnh tăng và nhạy cảm hơn với sai số mô hình. Trong mô phỏng này, giá trị $\lambda_{inner} = 0,3$ s cho vòng trong và $\lambda_{outer} = 1,5$ s cho vòng ngoài được sử dụng, đảm bảo tỷ lệ tốc độ phù hợp giữa hai vòng.
+
+Khả năng kháng nhiễu của phương pháp IMC cũng tốt hơn Ziegler-Nichols. Khi nhiễu tải được đưa vào, hệ thống phản ứng nhanh chóng và trở về ổn định với dao động nhỏ hơn. Thời gian bù trừ nhiễu khoảng 35-45 giây, nhanh hơn so với Ziegler-Nichols. Đối với nhiễu đo lường, tín hiệu điều khiển ít bị ảnh hưởng hơn nhờ bộ lọc tích hợp trong cấu trúc IMC, giúp giảm hiện tượng chattering của van.
+
+\begin{figure}[H]
+\centering
+% \includegraphics[width=0.85\textwidth]{Hinhve/chuong2_ket_qua_IMC.png}
+\caption{Đáp ứng của hệ thống với bộ điều khiển IMC}
+\label{fig:ch2_ket_qua_IMC}
+\end{figure}
+
+Một ưu điểm khác của phương pháp IMC là khả năng bù trừ tốt thời gian trễ của đối tượng. Trong mô hình đối tượng có thời gian trễ đáng kể, IMC sử dụng cấu trúc dự đoán để bù trừ ảnh hưởng của trễ, dẫn đến đáp ứng tốt hơn. Điều này thể hiện rõ qua việc hệ thống bắt đầu phản ứng sớm hơn và mượt mà hơn so với Ziegler-Nichols.
+
+Tuy nhiên, hiệu năng của phương pháp IMC phụ thuộc mạnh vào độ chính xác của mô hình. Để kiểm tra tính bền vững, mô phỏng được thực hiện với các tham số đối tượng bị thay đổi ±20\% so với giá trị danh định. Kết quả cho thấy chất lượng điều khiển giảm nhẹ nhưng hệ thống vẫn ổn định và hoạt động chấp nhận được, chứng tỏ phương pháp có độ bền vững nhất định mặc dù không được thiết kế tối ưu cho bất định.
+
+\subsection{Kết quả với phương pháp điều khiển bền vững}
+
+Kết quả mô phỏng với bộ điều khiển bền vững thiết kế theo phương pháp $H_\infty$ cho thấy đây là phương pháp có hiệu năng tổng thể tốt nhất trong ba phương pháp được xem xét, đặc biệt về khía cạnh độ bền vững và khả năng kháng nhiễu. Nhiều giá trị chỉ số bền vững $\gamma$ khác nhau được thử nghiệm, bao gồm $\gamma = 1,2$, $\gamma = 1,5$, $\gamma = 2,0$ và $\gamma = 3,0$.
+
+Với $\gamma = 1,2$, bộ điều khiển có hiệu năng cao nhất nhưng bậc bộ điều khiển cũng cao nhất (bậc 8-10) và nhạy cảm với việc rút gọn bậc. Đáp ứng của hệ thống rất mượt mà với độ quá điều chỉnh chỉ khoảng 5-8\% và thời gian xác lập khoảng 35-40 giây. Khả năng kháng nhiễu xuất sắc với dao động rất nhỏ khi có nhiễu tải.
+
+Với $\gamma = 1,5$, bộ điều khiển có bậc thấp hơn (bậc 6-7) và dễ rút gọn hơn trong khi vẫn duy trì hiệu năng tốt. Độ quá điều chỉnh khoảng 8-10\%, thời gian xác lập khoảng 38-45 giây, nằm giữa phương pháp Ziegler-Nichols và IMC với $\lambda$ nhỏ. Khả năng kháng nhiễu vẫn rất tốt, tốt hơn cả hai phương pháp kia.
+
+Với $\gamma = 2,0$ và $\gamma = 3,0$, bộ điều khiển đơn giản hơn (bậc 4-5) nhưng hiệu năng giảm dần, tiến gần đến hiệu năng của phương pháp IMC. Tuy nhiên, ngay cả với các giá trị $\gamma$ lớn này, độ bền vững của bộ điều khiển vẫn cao hơn IMC.
+
+\begin{figure}[H]
+\centering
+% \includegraphics[width=0.85\textwidth]{Hinhve/chuong2_ket_qua_Hinf.png}
+\caption{Đáp ứng của hệ thống với bộ điều khiển bền vững ($\gamma = 1,5$)}
+\label{fig:ch2_ket_qua_Hinf}
+\end{figure}
+
+Để đánh giá độ bền vững, mô phỏng được thực hiện với độ bất định lớn hơn, lên đến ±30\% và ±50\% cho các tham số đối tượng. Kết quả cho thấy bộ điều khiển bền vững duy trì chất lượng điều khiển tốt ngay cả với độ bất định lớn. Hệ thống vẫn ổn định và các chỉ tiêu hiệu năng chỉ giảm nhẹ. Ngược lại, với cùng mức độ bất định, các bộ điều khiển Ziegler-Nichols và IMC cho chất lượng giảm đáng kể, thậm chí có thể mất ổn định với bất định 50\%.
+
+Một lợi thế khác của phương pháp điều khiển bền vững là khả năng cân bằng tốt giữa nhiều mục tiêu khác nhau thông qua các hàm trọng số. Trong thiết kế này, khả năng kháng nhiễu được ưu tiên thông qua $W_P(s)$ trong khi vẫn đảm bảo tín hiệu điều khiển không quá lớn thông qua $W_U(s)$ và giới hạn nhạy cảm với nhiễu đo lường thông qua $W_T(s)$. Kết quả là một bộ điều khiển cân bằng tốt các yêu cầu khác nhau.
+
+Nhược điểm chính của phương pháp điều khiển bền vững là độ phức tạp. Bộ điều khiển ban đầu có bậc cao cần được rút gọn để triển khai thực tế. Quá trình rút gọn phải được thực hiện cẩn thận để không làm mất các đặc tính mong muốn. Trong đồ án này, phương pháp balanced truncation được sử dụng để rút gọn bộ điều khiển từ bậc 8 xuống bậc 4-5 trong khi vẫn giữ được hơn 95\% hiệu năng.
+
+\subsection{So sánh tổng hợp}
+
+Bảng dưới đây tổng hợp so sánh các chỉ tiêu định lượng của ba phương pháp chỉnh định đã được nghiên cứu. Các số liệu được lấy từ kịch bản bám giá trị đặt với sự thay đổi nhiệt độ từ 520°C lên 530°C.
+
+\begin{table}[H]
+\centering
+\caption{So sánh các chỉ tiêu của ba phương pháp chỉnh định}
+\label{tab:so_sanh_phuong_phap}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Chỉ tiêu} & \textbf{Ziegler-Nichols} & \textbf{IMC} & \textbf{$H_\infty$ ($\gamma=1,5$)} \\
+\hline
+Thời gian lên $t_r$ (s) & 17 & 23 & 21 \\
+\hline
+Thời gian xác lập $t_s$ (s) & 52 & 43 & 40 \\
+\hline
+Độ quá điều chỉnh $M_p$ (\\%) & 24 & 10 & 8 \\
+\hline
+Sai số xác lập $e_{ss}$ (°C) & 0,05 & 0,03 & 0,02 \\
+\hline
+ITAE & 485 & 352 & 318 \\
+\hline
+\end{tabular}
+\end{table}
+
+Từ bảng so sánh, có thể rút ra các nhận xét sau. Về tốc độ đáp ứng, phương pháp Ziegler-Nichols cho thời gian lên nhanh nhất nhưng kèm theo độ quá điều chỉnh lớn, dẫn đến thời gian xác lập dài nhất. Phương pháp IMC và $H_\infty$ có thời gian lên hơi chậm hơn nhưng thời gian xác lập ngắn hơn do dao động nhỏ.
+
+Về độ mượt mà của đáp ứng, phương pháp $H_\infty$ cho độ quá điều chỉnh nhỏ nhất, tiếp theo là IMC và cuối cùng là Ziegler-Nichols. Điều này rất quan trọng trong ứng dụng điều khiển nhiệt độ hơi quá nhiệt vì độ quá điều chỉnh lớn có thể gây hư hại thiết bị.
+
+Về độ chính xác, cả ba phương pháp đều cho sai số xác lập rất nhỏ nhờ có khâu tích phân. Tuy nhiên, phương pháp $H_\infty$ có sai số nhỏ nhất do được tối ưu hóa cho mục tiêu này.
+
+Chỉ số ITAE tổng hợp đánh giá chất lượng tổng thể của quá trình quá độ cho thấy phương pháp $H_\infty$ tốt nhất, tiếp theo là IMC và cuối cùng là Ziegler-Nichols. Giá trị ITAE nhỏ hơn có nghĩa là sai số được giảm nhanh hơn và tổng tích lũy sai số ít hơn.
+
+\begin{figure}[H]
+\centering
+% \includegraphics[width=\textwidth]{Hinhve/chuong2_so_sanh_3_phuong_phap.png}
+\caption{So sánh đáp ứng của hệ thống với ba phương pháp chỉnh định}
+\label{fig:ch2_so_sanh_3_phuong_phap}
+\end{figure}
+
+Về khả năng kháng nhiễu và độ bền vững, phương pháp $H_\infty$ vượt trội rõ rệt. Hệ thống với bộ điều khiển $H_\infty$ có khả năng bù trừ nhiễu nhanh hơn và ổn định hơn so với hai phương pháp kia. Đặc biệt, khi có bất định mô hình, phương pháp $H_\infty$ duy trì chất lượng tốt trong khi hai phương pháp kia giảm hiệu năng đáng kể.
+
+Về độ phức tạp triển khai, phương pháp Ziegler-Nichols đơn giản nhất với các công thức tính toán trực tiếp. Phương pháp IMC phức tạp hơn một chút nhưng vẫn có thể triển khai dễ dàng với các công cụ cơ bản. Phương pháp $H_\infty$ phức tạp nhất, yêu cầu công cụ tính toán chuyên dụng và quá trình rút gọn bậc.
+
+Về khả năng điều chỉnh, phương pháp Ziegler-Nichols có tính linh hoạt thấp, các tham số thường cần tinh chỉnh thủ công. Phương pháp IMC cho phép điều chỉnh dễ dàng thông qua tham số $\lambda$ duy nhất. Phương pháp $H_\infty$ cũng linh hoạt thông qua tham số $\gamma$ và các hàm trọng số, nhưng yêu cầu hiểu biết sâu hơn về lý thuyết.
+
+\section{Kết luận chương}
+
+Chương này đã trình bày chi tiết quá trình nhận dạng đối tượng điều khiển, thiết kế hệ thống điều khiển cascade và tổng hợp bộ điều khiển theo ba phương pháp khác nhau cho hệ thống điều khiển nhiệt độ hơi quá nhiệt. Các đối tượng điều khiển bao gồm van và bộ quá nhiệt đã được nhận dạng thành công bằng phương pháp số với độ chính xác cao. Cấu trúc điều khiển cascade hai vòng được thiết kế phù hợp với đặc điểm của đối tượng, trong đó vòng trong điều khiển nhanh đối tượng van và vòng ngoài điều khiển nhiệt độ hơi quá nhiệt.
+
+Ba phương pháp chỉnh định bộ điều khiển đã được nghiên cứu và triển khai. Phương pháp Ziegler-Nichols là phương pháp kinh điển, đơn giản và cho đáp ứng nhanh nhưng có độ quá điều chỉnh lớn. Phương pháp IMC là phương pháp hiện đại, cho phép điều chỉnh dễ dàng và đáp ứng mượt mà hơn với độ quá điều chỉnh nhỏ. Phương pháp điều khiển bền vững $H_\infty$ là phương pháp tiên tiến nhất, cho hiệu năng tổng thể tốt nhất và độ bền vững cao nhất nhưng phức tạp hơn về mặt thiết kế.
+
+Kết quả mô phỏng so sánh cho thấy phương pháp $H_\infty$ với $\gamma = 1,5$ cho chất lượng điều khiển tốt nhất với độ quá điều chỉnh 8\%, thời gian xác lập 40 giây và khả năng kháng nhiễu xuất sắc. Tuy nhiên, việc lựa chọn phương pháp phù hợp phụ thuộc vào yêu cầu cụ thể của ứng dụng, công cụ có sẵn và khả năng triển khai thực tế. Trong các ứng dụng đơn giản, Ziegler-Nichols có thể đủ tốt. Trong các ứng dụng yêu cầu cao hơn, IMC là lựa chọn cân bằng tốt. Trong các ứng dụng đòi hỏi độ tin cậy và bền vững cao nhất, phương pháp $H_\infty$ là lựa chọn ưu việt.
+
+Kết quả của chương này tạo cơ sở vững chắc cho việc triển khai thực tế hệ thống điều khiển, được trình bày trong chương tiếp theo.
 
 \end{document}
